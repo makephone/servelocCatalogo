@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.3/jquery.mobile.min.css" />
+     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <style>
+      .pagina_login{
+         background-attachment: fixed;
+         background-image: url(img/fundo);
+         background-repeat: no-repeat;
+         background-size: cover;
+         display: flex;
+         flex-direction: column;
+         height: 90vh;
+         justify-content: space-between;
+         position: relative;
+         width: 100%;
+         }
+    </style>
+
+    <script>
+
+
+ // Initialize Firebase
+ var config = {
+    apiKey: "AIzaSyBEhSmeDSwxSVX77kucOe6j5JF1G5NAEMk",
+    authDomain: "catalogo-fab01.firebaseapp.com",
+    databaseURL: "https://catalogo-fab01-default-rtdb.firebaseio.com",
+    projectId: "catalogo-fab01",
+    storageBucket: "catalogo-fab01.appspot.com",
+    messagingSenderId: "762404909",
+    appId: "1:762404909:web:e4456488b3e9d28a81d8a4",
+    measurementId: "G-6VHDDTZ377"
+  };
+  firebase.initializeApp(config);
+
+
+
+
+     var produto={
+       'codigo':'',
+       'preco':'',
+       'categoria':'',
+       'marca':'',
+       'opcoes':[]} 
+     var x =$(document);
+     x.ready(carrega);
+     function deletaCliente(j){
+      var serializado='id='+j;
+     $.ajax({
+			url: "/deletarCliente",
+			dataType: "json",
+      type:"POST",
+      data:serializado,
+			timeout: '10000',
+			async: true,
+		
+		}).done(function (data) {
+     
+    listagemCliente();
+    }).fail(function (jqXHR, texStatus) {
+			listagemCliente();
+    });
+    }
+
+
+    function carregaListaproduto(){
+
+var ajax = $.ajax({
+url: "/PESQUISA/0/1",
+dataType: "json",
+timeout: '10000',
+async: true,
+
+}).done(function (data) {
+   var a="";
+    $.each(data.docs,function(i,val){
+    a+=' <li><a><img src="'+val.url+'"><h1>'+val.title+'</h1><p>cod :'+val.codl+'</p></a><a data-icon=\'delete\' onclick=(deletaSandalias("'+val.codl+'"))></a></li>';
+    })
+
+
+
+    $('#ListagemProduct').html(a);
+   $('#ListagemProduct').listview('refresh');
+
+}).fail(function (jqXHR, texStatus) {
+carregaListaproduto();
+});
+
+
+  
+
+ }
+
+
+    function deletaSandalias(i){
+
+
+      var serializado='ci='+i;
+     $.ajax({
+			url: "/deletarSandalia",
+			dataType: "json",
+      type:"POST",
+      data:serializado,
+			timeout: '10000',
+			async: true,
+		
+		}).done(function (data) {
+     carregaListaproduto();
+    }).fail(function (jqXHR, texStatus) {
+		carregaListaproduto();
+    });
+
+
+    }
+
+    function listagemCliente(){
+     
+     var ajax = $.ajax({
+     url: "/listacliente",
+     dataType: "json",
+     timeout: '10000',
+     async: true,
+   
+   }).done(function (data) {
+          var a="";
+          $.each(data,function(i,val){
+          a+="<li ><a><img src='img/avatar'><h3>"+val.nome+"</h3><p class='ui-li-count'>codigo: "+val.codigo+"</p><p>"+val.tel+"</p></a><a onclick='deletaCliente(\""+val.codigo+"\")' data-icon='delete'></a></li>"
+          
+         })
+        
+
+          
+
+          
+          $('#listCliente').html(a);
+          $('#listCliente').listview("refresh")
+
+   }).fail(function (jqXHR, texStatus) {
+     listagemCliente();
+   });
+    }
+
+     function addOpcoesCores(cod,url){
+       var op={'cod':cod,'foto':url};
+      produto.opcoes.push(op);
+      atualizarListagemOptions(produto.opcoes)
+     }
+
+
+     function atualizarListagemOptions(data){
+          var a="";
+          $.each(data,function(i,val){
+          a+=' <li><img src="'+val.foto+'"><h1>'+val.cod+'</h1></li>';
+          })
+
+          $('#atualizarListagem').html(a);
+         $('#atualizarListagem').listview('refresh');
+         $("#finalizarcadastro").show();
+
+     }
+
+
+     function carrega(){
+       $('#formCategoriaSelect').hide();
+       $('#formMarcaSelect').hide();
+       $("#formOpcoesCoresSelect").hide();
+       $("#refleshPage").hide();
+       $("#uploadformOpcoes").hide();
+       $("#codigoprecoinseri").hide();
+       $("#finalizarcadastro").hide();
+       $("#codigoPrecoAnalizarproduto").mask('000,00')
+       $('#codCorFiles').mask('00000');
+       $('#codigoProdutoAnalizar').mask('00000');
+       $("#telefone").mask('00000000000');
+
+
+
+       $("#finalizarcadastro").click(finalizarcadastrofinal);
+
+       $("#removeuploadlist").click(removeUploadFun);
+
+       function removeUploadFun(){
+          produto.opcoes.pop();
+          atualizarListagemOptions(produto.opcoes)
+       }
+
+
+       function finalizarcadastrofinal(){
+         var enviar=produto.opcoes;
+         enviar=JSON.stringify(enviar)
+         enviar=enviar.replace(/&/g,'#')
+         enviar=enviar.replace(/\//g,'@')
+         
+
+         var serializado='dados='+enviar+'&codigo='+produto.codigo+'&preco='+produto.preco+'&marca='+produto.marca+'&categoria='+produto.categoria;
+     $.ajax({
+			url: "/inserirProduto",
+			dataType: "json",
+      type:"POST",
+      data:serializado,
+			timeout: '10000',
+			async: true,
+		
+		}).done(function (data) {
+      
+      window.location.assign("http://localhost:8001/");
+
+		}).fail(function (jqXHR, texStatus) {
+			alert("falha!")
+    });
+       } 
+
+       $('#fileButton').change(function(e) {
+       var texto=$('#codCorFiles').val();
+       if(texto==""){
+         alert('DIGITE O CÓDIGO DA COR !')
+       }else{
+         
+        var file = e.target.files[0];
+        var storageRef = firebase.storage().ref(produto.codigo+''+texto+''+file.name);
+        var task =storageRef.put(file);
+
+        task.on('state_changed', function progress(snapshot) {
+    var percentage = (snapshot.bytesTransferred/snapshot.totalBytes)*100;
+    $("#uploader").val(percentage);
+  }, function error(err) {
+
+  },function complete() {
+    task.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+           $('#codCorFiles').val("");
+           addOpcoesCores(texto,downloadURL);
+	
+          });
+  });
+
+
+
+
+
+
+       }
+      
+      });
+
+       $('#refleshPage').click(manda);
+
+       function manda(){
+        location.reload();
+       }
+
+       $('#codCorFiles').blur(codao);
+
+       function codao(){
+        var texto=$('#codCorFiles').val();
+       if(texto==""){
+         alert('DIGITE O CÓDIGO DA COR !')
+       }else{
+        $("#uploadformOpcoes").show();
+       }
+       
+       }
+
+
+
+       $('#selecaoMarcaSandalia').on('change', function () {
+         var marca=this.value;
+         if(marca==""){
+           $("#formOpcoesCoresSelect").hide();
+           $("#uploadformOpcoes").hide();
+           $("#uploadformOpcoes").hide();
+           produto.marca="";
+         }else{
+           produto.marca=marca;
+           $("#formOpcoesCoresSelect").show();
+         }
+
+       });
+
+       $('#selecaoCategoriaSandalia').on('change', function () {
+	      var categoria=this.value;
+        if(categoria==""){
+         
+          $('#formMarcaSelect').hide();
+          $("#formOpcoesCoresSelect").hide();
+          $("#uploadformOpcoes").hide();
+        }else{
+          produto.categoria=categoria;
+         $('#formMarcaSelect').show();
+        }
+	     
+	       });
+
+      
+
+      $('#listagemProduto').click(carregaPaginaproduto)
+
+      function carregaPaginaproduto(){
+         $.mobile.changePage('#listagemProduto');
+         carregaListaproduto();
+      
+      
+        }
+
+
+
+
+
+
+
+
+
+      
+      $('#listagemCliente').click(carregaPaginacliente);
+
+       function carregaPaginacliente(){
+        $.mobile.changePage('#listagemCliente');
+        listagemCliente();
+       }
+
+     
+      
+
+ 
+    
+     $("#cadastrar").hide();
+
+     $("#validacodigo").blur(verificaCodigoCliente);
+     
+
+     ////
+     function verificaCodigoCliente(){
+
+var a =$("#validacodigo").val();
+a=String(a);
+var code=a;
+a=a.length;
+if(a>5){
+
+var ajax = $.ajax({
+url: "/verificar/"+code,
+dataType: "json",
+timeout: '10000',
+async: true,
+
+}).done(function (data) {
+if(data.nome=="0"){
+ $("#cadastrar").show();
+}else{
+ $("#cadastrar").hide();
+}
+
+}).fail(function (jqXHR, texStatus) {
+verificaCodigoCliente();
+});
+}else{
+$("#cadastrar").hide();
+alert('digite mais caracteres !')
+
+}
+} 
+
+     /////
+    
+     $("#codigoProdutoAnalizar").blur(analizar);
+     
+     $("#codigoPrecoAnalizarproduto").blur(anf)
+     function anf(){
+      var prec= $("#codigoPrecoAnalizarproduto").val();
+      if(prec==""){
+        alert('DIGITE UM VALOR !');
+        $("#codigoPrecoAnalizarproduto").val("00,00");
+        produto.preco="00.00"
+        $('#finalizarcadastro').hide();
+        $('#formCategoriaSelect').show();
+      }else{
+        prec=prec.replace(',','.');
+        a=prec.charAt(0);
+      if(a=="0"){
+          prec=prec.slice(1,6)
+        
+        }
+        produto.preco=prec
+        $('#formCategoriaSelect').show();
+      }
+      
+      
+     }
+
+     function analizar(){
+     var dado =$("#codigoProdutoAnalizar").val();
+     dado=String(dado);
+     ajax = $.ajax({
+			url: "/verificarProduto/"+dado,
+			dataType: "json",
+			timeout: '10000',
+			async: true,
+		
+		}).done(function (data) {
+      
+      if(data.nome=="0"){
+         $('#codigoprecoinseri').show();
+         produto.codigo=dado;
+         $("#codigoProdutoAnalizar").prop('disabled', true);
+         $("#refleshPage").show();
+        
+      }else{
+        $('#codigoprecoinseri').hide();
+        $('#formCategoriaSelect').hide();
+        $('#formMarcaSelect').hide();
+        $("#formOpcoesCoresSelect").hide();
+        produto.codigo="";
+      }
+
+		}).fail(function (jqXHR, texStatus) {
+			analizar();
+    });
+     
+     
+     
+     
+     
+     
+     
+     
+      }
+
+
+
+
+
+
+     
+     $("#cadastrar").click(cadastrarCliente);
+
+     function cadastrarCliente(){
+      var name =$("#nome").val();
+      var telefone =$("#telefone").val();
+      var codigo =$("#validacodigo").val();
+
+      name=String(name);
+      name=name.toUpperCase();
+      telefone=String(telefone);
+      codigo=String(codigo); 
+      if(name==""||telefone==""){
+       alert("campos vazios");
+      }else{
+/////////////////
+     var serializado='nome='+name+'&cod='+codigo+'&tel='+telefone;
+     $.ajax({
+			url: "/inserirCliente",
+			dataType: "json",
+      type:"POST",
+      data:serializado,
+			timeout: '10000',
+			async: true,
+		
+		}).done(function (data) {
+      
+      $("#nome").val('');
+      $("#telefone").val('');
+      $("#validacodigo").val('');
+      $("#cadastrar").hide();
+      $.mobile.changePage('#main');
+
+		}).fail(function (jqXHR, texStatus) {
+			alert("falha!")
+    });
+
+
+////////////////////
+      }
+
+
+
+
+
+     }
+
+
+
+
+
+    
+    }
+
+
+
+
+
+
+
+    </script>
+    
+   <title>Catálogo</title>
+  </head>
+
+  <body>
+    <div data-role="page" id="main" class="pagina_login">
+        <div data-role="header"><h1>Painel Principal</h1></div>
+        
+         <div data-role="content" class="styloPagina">
+          <div class="ui-grid-a">
+            <div class="ui-block-a"> <a class="ui-input-btn ui-btn ui-icon-plus ui-btn-icon-top ui-btn-b" data-role="button" href="#cadastroCliente">Cadastro Cliente</a></div>
+            <div class="ui-block-b"><a  class="ui-input-btn ui-btn ui-icon-user ui-btn-icon-top " id="listagemCliente" data-role="button">Listagem Cliente</a></div>
+            <div class="ui-block-a"> <a class="ui-input-btn ui-btn ui-icon-shop ui-btn-icon-top " data-role="button" href="#cadastroProduto">Cadastro Produto</a></div>
+            <div class="ui-block-b"><a class="ui-input-btn ui-btn ui-icon-bars ui-btn-icon-top ui-btn-b" data-role="button" id="listagemProduto">Listagem Produto</a></div>
+          </div>
+         </div>
+                    
+      <div data-role="footer" data-position="fixed"><h1>ADMINISTRADOR</h1></div>
+    </div>
+
+    <div data-role="page" id="cadastroCliente">
+        <div data-role="header"><h1>Cadastro Cliente</h1></div>
+        
+      
+      <div data-role="content">
+        <form>
+          <label>Nome</label>
+          <input id="nome" type="text" placeholder="Tiago C.Silva">  
+          <label>Telefone</label>
+          <input id="telefone" type="text" placeholder="987286760">
+          <label>Codigo Do Cliente </label>
+          <input id="validacodigo" type="text" placeholder="123456"> 
+          </form>
+          <a id="cadastrar" class="ui-btn" >Cadastrar</a>
+      </div>
+      
+
+    <div data-role="footer" data-position="fixed"><h1>Cadastro Cliente</h1></div>
+    </div>
+    <div data-role="page" id="listagemCliente">
+    <div data-role="header"><h1>Listagem Cliente</h1></div>
+    <ul data-role="listview" id="listCliente" data-filter="true" data-filter-placeholder="Digite o Nome do Cliente">
+    </ul>
+      
+
+      <div data-role="footer" data-position="fixed"><h1>Listagem Cliente</h1></div>
+    </div>
+
+    <div data-role="page" id="cadastroProduto">
+        <div data-role="header"><h1>Cadastro Produto</h1></div>
+        <div data-role="content">
+          <div>
+            <p>DIGITE O CÓDIGO<div id="refleshPage" class="ui-btn ui-icon-delete ui-btn-icon-notext ui-corner-all"></div>
+            </p>
+            <input id='codigoProdutoAnalizar' type="text" placeholder="11678">
+            <p id="codigoprecoinseri" >R$ <input id='codigoPrecoAnalizarproduto' type="text" placeholder="100,00"></p>
+          </div>
+          <div data-role="fielcointain" id="formCategoriaSelect">
+            <label for="fum-selecao" class="ui-hidden-acessible">Escolha uma Categoria</label>
+            <select name="fum-selecao" id="selecaoCategoriaSandalia">
+                <option value="">Escolha uma Categoria</option>
+                <option value="0">FEMININO</option>
+                <option value="1">MASCULINO</option>
+                <option value="2">IPANEMA</option>
+                <option value="3">IPANEMA BABY E INFANTIL</option>
+                <option value="4">KIDS C.PERSONAGENS E BRIQUEDOR</option>
+                <option value="5">FEMININO INFANTIL</option>
+            </select>
+           </div>
+
+
+           <div data-role="fielcointain" id="formMarcaSelect">
+            <label for="fum-selecao" class="ui-hidden-acessible">Escolha uma Marca</label>
+            <select name="fum-selecao" id="selecaoMarcaSandalia">
+                <option value="">Escolha uma Marca</option>
+                <option value="0">AZALEIA</option>
+                <option value="1">GRENDHA</option>
+                <option value="2">ZAXY</option>
+                <option value="3">IPANEMA UNIVERSAL</option>
+                <option value="4">IPANEMA BABY E INFANTIL UNIVERSAL</option>
+                <option value="5">KIDS C.PERSONAGENS E BRINQUEDO UNIVERSAL</option>
+                <option value="6">CARTAGO AD</option>
+                <option value="7">CARTAGO INFANTIL E BABY</option>
+                <option value="8">MORMAII AD</option>
+                <option value="9">RIDE AD</option>
+                <option value="10">RIDE INFANTIL E BABY</option>
+            </select>
+           </div>
+           <div id="formOpcoesCoresSelect">
+           <h3>Adicionar Opções De Cor </h3>
+           <ul data-role="listview" id="atualizarListagem">
+           </ul>
+           <div>
+             <p>Digite o Código da Cor</p>
+             <input type="text" id="codCorFiles" placeholder="233443">
+             </div>
+          </div>
+
+          <div id="uploadformOpcoes">
+            <progress id="uploader" value="0" max="100">0%</progress>
+             <input type="file" id="fileButton" accept=".jpg,.jpeg,.png"value="upload"/>
+             <a id="removeuploadlist" data-role="button">Remove</a>
+          </div>
+           
+          <button class="ui-btn ui-btn-b" id="finalizarcadastro">FINALIZAR CADASTRO</button>
+        </div>
+      
+        
+      
+
+      <div data-role="footer" data-position="fixed"><h1>Cadastro Produto</h1></div>
+    </div>
+
+    <div data-role="page" id="listagemProduto">
+        <div data-role="header"><h1>Listagem Produto</h1></div>
+        
+      
+        <ul data-role="listview" id="ListagemProduct" data-filter="true" data-filter-placeholder="Digite o Código do Produto">
+        </ul>
+      
+
+      <div data-role="footer" data-position="fixed"><h1>Listagem Produto</h1></div>
+    </div>
+
+
+
+
+  </body>
+
+</html>
