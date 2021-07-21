@@ -232,6 +232,37 @@ app.get('/', (req, res) => {
   })
 
 
+  app.get('/1', (req, res) => {
+    // aqui precisamos enviar o index.html para o cliente
+    res.sendFile(path.join(__dirname + '/css/1.css'))
+  })  
+
+  app.get('/2', (req, res) => {
+    // aqui precisamos enviar o index.html para o cliente
+    res.sendFile(path.join(__dirname + '/css/2.css'))
+  })  
+  app.get('/3', (req, res) => {
+    // aqui precisamos enviar o index.html para o cliente
+    res.sendFile(path.join(__dirname + '/script/1.js'))
+  })  
+
+  app.get('/4', (req, res) => {
+    // aqui precisamos enviar o index.html para o cliente
+    res.sendFile(path.join(__dirname + '/script/2.js'))
+  })  
+
+  app.get('/5', (req, res) => {
+    // aqui precisamos enviar o index.html para o cliente
+    res.sendFile(path.join(__dirname + '/script/3.js'))
+  })  
+
+  app.get('/6', (req, res) => {
+    // aqui precisamos enviar o index.html para o cliente
+    res.sendFile(path.join(__dirname + '/script/4.js'))
+  })  
+
+
+
   app.get('/img/fundo', (req, res) => {
     // aqui precisamos enviar o index.html para o cliente
     res.sendFile(path.join(__dirname + '/img/fundo.png'))

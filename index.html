@@ -2,12 +2,12 @@
 <html>
 
   <head>
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jquerymobile/1.4.3/jquery.mobile.min.css" />
-     <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
-    <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-    <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/3.7.4/firebase.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    <link rel="stylesheet" href="1" />
+     <link rel="stylesheet" href="2" />
+    <script src="3"></script>
+    <script src="4"></script>
+    <script src="5"></script>
+    <script src="6"></script>
     <style>
       .pagina_login{
          background-attachment: fixed;
@@ -380,11 +380,30 @@ alert('digite mais caracteres !')
         $('#formCategoriaSelect').show();
       }else{
         prec=prec.replace(',','.');
+        var cont=prec.length;
+        if(cont==5){
+          prec+='0';
+        }
+        if(cont==4){
+          prec+='00';
+        }
+        if(cont==3){
+          prec+='.00';
+        }
+        if(cont==2){
+          prec+='0.00';
+        }
+        if(cont==1){
+          prec+='00.00';
+        }
+        
+        
         a=prec.charAt(0);
       if(a=="0"){
           prec=prec.slice(1,6)
         
         }
+        
         produto.preco=prec
         $('#formCategoriaSelect').show();
       }
